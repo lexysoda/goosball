@@ -20,6 +20,7 @@ func (a *Api) Init(c *controller.Controller) {
 	mux.HandleFunc("/queue", a.Queue)
 	mux.HandleFunc("/queue/", a.RemoveFromQueue)
 	mux.HandleFunc("/users", a.Users)
+	mux.HandleFunc("/set", a.CancelSet)
 	a.ServeMux = mux
 	a.controller = c
 }
@@ -90,5 +91,14 @@ func (a *Api) RemoveFromQueue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.controller.RemoveFromQueue(id)
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (a *Api) CancelSet(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "only delete", http.StatusBadRequest)
+		return
+	}
+	a.controller.CancelSet()
 	w.WriteHeader(http.StatusNoContent)
 }

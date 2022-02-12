@@ -126,6 +126,12 @@
      .then(() => updateState());
  }
 
+function cancel() {
+  return fetch("/api/set", {method: "DELETE"} )
+      .catch(err => alert(err))
+      .then(() => updateState());
+}
+
  function updateState() {
    return ffetch("/api/state").then(state => {
      setState(state);

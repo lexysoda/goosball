@@ -184,3 +184,10 @@ func (c *Controller) FinishSet(isTeamA bool) error {
 
 	return nil
 }
+
+func (c *Controller) CancelSet() {
+	c.Lock()
+	c.State.Set = nil
+	c.State.Games = []model.Game{}
+	c.Unlock()
+}
