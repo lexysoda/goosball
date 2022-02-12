@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"path"
 
 	"github.com/lexysoda/goosball/controller"
 )
@@ -17,6 +18,7 @@ func (a *Api) Init(c *controller.Controller) {
 	mux.HandleFunc("/state", a.GetState)
 	mux.HandleFunc("/score", a.Score)
 	mux.HandleFunc("/queue", a.Queue)
+	mux.HandleFunc("/queue/", a.RemoveFromQueue)
 	mux.HandleFunc("/users", a.Users)
 	a.ServeMux = mux
 	a.controller = c
@@ -75,4 +77,18 @@ func (a *Api) Users(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(json)
+}
+
+func (a *Api) RemoveFromQueue(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "only delete", http.StatusBadRequest)
+		return
+	}
+	id := path.Base(r.URL.Path)
+	if id == "queue" {
+		http.Error(w, "need id", http.StatusBadRequest)
+		return
+	}
+	a.controller.RemoveFromQueue(id)
+	w.WriteHeader(http.StatusNoContent)
 }

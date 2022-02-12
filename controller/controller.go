@@ -68,6 +68,18 @@ func (c *Controller) AddToQueue(ids ...string) error {
 	return nil
 }
 
+func (c *Controller) RemoveFromQueue(id string) {
+	c.Lock()
+	defer c.Unlock()
+	newQueue := []model.User{}
+	for _, u := range c.State.Queue {
+		if u.ID != id {
+			newQueue = append(newQueue, u)
+		}
+	}
+	c.State.Queue = newQueue
+}
+
 func (c *Controller) StartMatch() {
 	p := c.State.Queue[:4]
 	c.State.Queue = c.State.Queue[4:]

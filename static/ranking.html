@@ -229,11 +229,7 @@
  }
 
  function removeFromQueue(id) {
-   return ffetch("/queue")
-     .then(queue => {
-       queue = queue.filter(queueId => queueId != id)
-       return ffetch("/queue", {method: "POST", body: JSON.stringify(queue)})
-     })
+     return fetch("/api/queue/" + id, {method: "DELETE"})
      .then(() => update())
      .catch(err => alert(err));
  }
