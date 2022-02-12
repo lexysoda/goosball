@@ -16,6 +16,8 @@ func (a *Api) Init(c *controller.Controller) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/state", a.GetState)
 	mux.HandleFunc("/score", a.Score)
+	mux.HandleFunc("/queue", a.Queue)
+	mux.HandleFunc("/users", a.Users)
 	a.ServeMux = mux
 	a.controller = c
 }
@@ -40,4 +42,37 @@ func (a *Api) Score(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.controller.Score(isTeamA)
+}
+
+func (a *Api) Queue(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "only posts", http.StatusMethodNotAllowed)
+		return
+	}
+	var userId string
+	if err := json.NewDecoder(r.Body).Decode(&userId); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if err := a.controller.AddToQueue(userId); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+}
+
+func (a *Api) Users(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "only get", http.StatusBadRequest)
+		return
+	}
+	users, err := a.controller.GetAllUsers()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	json, err := json.Marshal(users)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(json)
 }

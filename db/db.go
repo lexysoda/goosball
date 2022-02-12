@@ -64,6 +64,30 @@ func (db *DB) GetUser(id string) (*model.User, error) {
 	return uGot, err
 }
 
+func (db *DB) GetUsers() ([]model.User, error) {
+	users := []model.User{}
+	rows, err := db.Query("SELECT * FROM users")
+	if err != nil {
+		return users, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		u := model.User{}
+		if err := rows.Scan(
+			&u.ID,
+			&u.DisplayName,
+			&u.RealName,
+			&u.Avatar,
+			&u.Skill.Mu,
+			&u.Skill.SigSq,
+		); err != nil {
+			return users, err
+		}
+		users = append(users, u)
+	}
+	return users, nil
+}
+
 func (db *DB) GetSet(id int64) (*model.Set, error) {
 	s := &model.Set{}
 	err := db.QueryRow("SELECT * from sets WHERE ID = ?", id).Scan(

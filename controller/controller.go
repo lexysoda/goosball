@@ -28,6 +28,10 @@ type State struct {
 	Set   *model.Set
 }
 
+func (c *Controller) GetAllUsers() ([]model.User, error) {
+	return c.Db.GetUsers()
+}
+
 func (c *Controller) GetOrCreateUser(id string) (*model.User, error) {
 	uGot, err := c.Db.GetUser(id)
 	if err == nil {
@@ -43,17 +47,21 @@ func (c *Controller) GetOrCreateUser(id string) (*model.User, error) {
 	return uNew, c.Db.AddUser(uNew)
 }
 
-func (c *Controller) AddToQueue(newUsers []model.User) error {
+func (c *Controller) AddToQueue(ids ...string) error {
 	c.Lock()
 	defer c.Unlock()
-	for _, u := range c.State.Queue {
-		for _, unew := range newUsers {
-			if u.ID == unew.ID {
-				return fmt.Errorf("User %s already in Queue", u.DisplayName)
+	for _, id := range ids {
+		user, err := c.GetOrCreateUser(id)
+		if err != nil {
+			return err
+		}
+		for _, uq := range c.State.Queue {
+			if uq.ID == user.ID {
+				return fmt.Errorf("User %s already in Queue", uq.DisplayName)
 			}
 		}
+		c.State.Queue = append(c.State.Queue, *user)
 	}
-	c.State.Queue = append(c.State.Queue, newUsers...)
 	if len(c.State.Queue) >= 4 && c.State.Set == nil {
 		c.StartMatch()
 	}
@@ -125,7 +133,7 @@ func (c *Controller) FinishGame(isTeamA bool) error {
 	g.EndTime = time.Now()
 	if len(c.State.Games) == 2 &&
 		(isTeamA && c.State.Games[0].GoalsA == 6 ||
-		!isTeamA && c.State.Games[0].GoalsB == 6) {
+			!isTeamA && c.State.Games[0].GoalsB == 6) {
 		return c.FinishSet(isTeamA)
 	} else if len(c.State.Games) == 3 {
 		return c.FinishSet(isTeamA)

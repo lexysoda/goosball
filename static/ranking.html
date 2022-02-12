@@ -1,0 +1,261 @@
+<!DOCTYPE HTML>
+<head>
+  <style>
+   * {
+     box-sizing: border-box;
+   }
+
+   html, body {
+     height: 100%;
+     margin: 0;
+   }
+
+   body {
+     display: grid;
+     grid-template-areas:
+       "menu"
+       "game"
+       "queue"
+       "main"
+       "recent";
+   }
+
+   @media (min-width: 1000px) {
+     body {
+       display: grid;
+       grid-template-columns: 3fr 1fr;
+       grid-template-rows: 5vh 1fr 5fr 5fr;
+       grid-template-areas:
+         "menu   menu"
+         "main   game"
+         "main   queue"
+         "main   recent";
+     }
+   }
+
+   #main,#queue,#recent {
+     display: flex;
+     flex-direction: column;
+     overflow: hidden;
+     height: 100%;
+   }
+
+   #main {
+     grid-area: main;
+   }
+
+   #player-list {
+     overflow-y: scroll;
+     height: 100%;
+   }
+
+   #queue {
+     grid-area: queue;
+   }
+
+   #queue-list {
+     overflow-y: scroll;
+     height: 100%;
+   }
+
+   #recent {
+     grid-area: recent;
+   }
+
+   #recent-list {
+     overflow-y: scroll;
+     height: 100%;
+   }
+
+   #menu {
+     grid-area: menu;
+     display: flex;
+     flex-direction: row;
+     justify-content: space-around;
+     font-size: 8vmin;
+   }
+
+   h1 {
+     font-size: 5vmin;
+     margin-left: 0.25em;
+   }
+
+   #menu > * {
+     display: inline-block;
+     cursor: pointer;
+   }
+
+   .avatar {
+     display: inline-block;
+     width: 2em;
+     height: 2em;
+     border-radius: 50%;
+     box-shadow: 0px 1px 2px #555;
+     margin-right: 1em;
+   }
+
+   .player {
+     display: flex;
+     align-items: center;
+     justify-content: space-around;
+     cursor: pointer;
+     font-size: 2em;
+     font-family: monospace;
+     width: 100%;
+     padding: 1em;
+   }
+
+   .player .name {
+     width: 10em;
+   }
+
+   .player .index {
+     width: 2em;
+   }
+
+   .player .skill {
+     font-size: 0.75em;
+   }
+
+   .team {
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+   }
+
+   #game {
+     grid-area: game;
+     overflow: hidden;
+   }
+
+   #game .skill {
+     display: none;
+   }
+
+   #game .team {
+     flex-direction: row;
+   }
+
+   .team-vs-team {
+     display: flex;
+     flex-direction: row;
+     align-items: center;
+     justify-content: space-around;
+     padding: 1em;
+   }
+
+   #player-list .player:nth-child(even) {
+     background-color: #F8F8F8;
+   }
+  </style>
+</head>
+<body>
+  <div id="menu">
+    <div onclick="window.location='/index.html';">game</div>
+  </div>
+  <div id="main">
+    <h1>Players</h1>
+    <div id="player-list"></div>
+  </div>
+  <div id="game"></div>
+  <div id="queue">
+    <h1>Queue</h1>
+    <div id="queue-list"></div>
+  </div>
+  <div id="recent">
+    <h1>Recent</h1>
+    <div id="recent-list"></div>
+  </div>
+</body>
+<script>
+ update();
+
+ function update() {
+   ffetch("/api/users").then(res => {
+     users = res.map(u => addScore(u)).sort((a, b) => b.Score - a.Score);
+     const {players, queue, recent, game} = {
+       players: elem("#player-list"),
+       queue: elem("#queue-list"),
+       recent: elem("#recent-list"),
+       game: elem("#game"),
+     };
+     if (players.innerHTML == '') {
+       users.forEach((user, i) => players.appendChild(playerRow(addToQueue, user, i+1)));
+     }
+
+     queue.innerHTML = '';
+     recent.innerHTML = '';
+    return ffetch("/api/state")
+         .then(state => {
+          state.Queue.forEach((user, i) => 
+             queue.appendChild(playerRow(removeFromQueue, addScore(user), i+1)))
+           });
+     })}
+
+ function teamRow(teamA, teamB) {
+   const x = document.createElement("div");
+   const player = (user) => {
+     user = addScore(user);
+     return `
+        <div class="player">
+        <img class="avatar" src="${user.Avatar}" alt="${user.Name}" title="${user.Name}">
+        <span class="skill">${user.Score.toFixed(2)} (${user.Sigma.toFixed(2)})</span>
+        </div>`;
+   };
+   x.innerHTML = `
+     <div class="team">
+       ${player(teamA[0])}
+       ${player(teamA[1])}
+     </div>
+     <span>VS</span>
+     <div class="team">
+       ${player(teamB[0])}
+       ${player(teamB[1])}
+     </div>`;
+   x.classList.add('team-vs-team');
+   return x
+ }
+
+ function playerRow(f, user, i) {
+   const x = document.createElement("div");
+   x.innerHTML = `
+     <span class="index">${i}</span>
+     <img  class="avatar" src="${user.Avatar}">
+     <span class="name">${[user.RealName, user.Name].filter(x => x != "")[0]}</span>
+     <span class="skill">${user.Score.toFixed(2)} (${user.Sigma.toFixed(2)})</span>`;
+   x.classList.add('player');
+   x.onclick = () => f(user.ID);
+   return x
+ }
+
+ function removeFromQueue(id) {
+   return ffetch("/queue")
+     .then(queue => {
+       queue = queue.filter(queueId => queueId != id)
+       return ffetch("/queue", {method: "POST", body: JSON.stringify(queue)})
+     })
+     .then(() => update())
+     .catch(err => alert(err));
+ }
+
+ function addToQueue(id) {
+   return fetch("/api/queue", {method: "POST", body: JSON.stringify(id)})
+       //.then(started => started ? window.location = '/index.html' : update())
+       .catch(err => alert(err))
+       .then(() => update());
+ }
+
+ function elem(selector) { return document.querySelector(selector); }
+
+ function ffetch(url, options) {
+   return fetch(url, options).then(response => {
+     return response.text().then(body => response.ok ? JSON.parse(body) : Promise.reject(body))
+   });
+ }
+
+  const addScore = (user) => ({
+      ...user,
+      Score: user.Skill.Mu - 3 * Math.sqrt(user.Skill.SigSq),
+      Sigma: Math.sqrt(user.Skill.SigSq),
+  });
+</script>

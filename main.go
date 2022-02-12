@@ -9,7 +9,6 @@ import (
 	"github.com/lexysoda/goosball/api"
 	"github.com/lexysoda/goosball/controller"
 	"github.com/lexysoda/goosball/db"
-	"github.com/lexysoda/goosball/model"
 	"github.com/lexysoda/goosball/slack"
 )
 
@@ -25,7 +24,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		err = c.AddToQueue([]model.User{*u})
+		err = c.AddToQueue(u.ID)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -46,5 +45,6 @@ func main() {
 	a := &api.Api{}
 	a.Init(c)
 	http.Handle("/api/", http.StripPrefix("/api", a))
+	http.Handle("/", http.FileServer(http.Dir("static")))
 	log.Fatal(http.ListenAndServe(":1337", nil))
 }

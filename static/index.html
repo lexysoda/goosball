@@ -1,0 +1,167 @@
+<!DOCTYPE HTML>
+<head>
+  <style>
+   html, body {
+     height: 100%;
+     margin: 0;
+   }
+
+   body {
+     display: grid;
+     grid-template-rows: 5vh 3fr 3fr 3fr;
+     grid-template-areas:
+       "menu"
+       "team-a"
+       "center"
+       "team-b";
+   }
+
+   @media (min-width: 1000px) {
+     body {
+       display: grid;
+       grid-template-columns: 1fr 3fr 1fr;
+       grid-template-rows: 5vh 10fr;
+       grid-template-areas:
+         "menu menu menu"
+         "team-a center team-b";
+     }
+     .team {
+       flex-direction: column !important;
+     }
+   }
+
+   #team-a {
+     grid-area: team-a;
+   }
+
+   #team-b {
+     grid-area: team-b;
+   }
+
+   #center {
+     grid-area: center;
+     display: flex;
+     flex-direction: column;
+     justify-content: space-around;
+   }
+
+   #menu {
+     grid-area: menu;
+     display: flex;
+     flex-direction: row;
+     justify-content: space-around;
+     font-size: 8vmin;
+   }
+
+   #menu > * {
+     cursor: pointer;
+   }
+
+   #game-score {
+     display: flex;
+     flex-direction: row;
+     justify-content: space-around;
+     font-size: 30vmin;
+   }
+
+   #set-score {
+     display: flex;
+     flex-direction: row;
+     justify-content: space-around;
+     font-size: 15vmin;
+   }
+
+   .avatar {
+     min-height: 30%;
+     max-height: 45%;
+     max-width: 90%;
+     border-radius: 50%;
+     box-shadow: 0px 1px 2px #555;
+     cursor: pointer;
+   }
+
+   .team {
+     display: flex;
+     flex-direction: row;
+     justify-content: space-around;
+     align-items: center;
+   }
+
+  </style>
+</head>
+<body>
+  <div id="menu">
+    <div onclick="unscore();">unscore</div>
+    <div onclick="cancel();">cancel</div>
+    <div onclick="window.location='ranking.html';">ranking</div>
+  </div>
+
+  <div id="team-a" class="team">
+    <img id="team-a-1" class="avatar" onclick="score(true);">
+    <img id="team-a-2" class="avatar" onclick="score(true);">
+  </div>
+
+  <div id="center">
+    <div id="set-score"></div>
+    <div id="game-score"></div>
+  </div>
+
+  <div id="team-b" class="team">
+    <img id="team-b-1" class="avatar" onclick="score(false);">
+    <img id="team-b-2" class="avatar" onclick="score(false);">
+  </div>
+</body>
+<script>
+ updateState();
+
+ function elem(selector) { return document.querySelector(selector); }
+
+ function score(isTeamA) {
+   return fetch("/api/score", {
+         method: 'POST',
+         headers: {'Content-Type': 'application/json'},
+         body: JSON.stringify(isTeamA)
+       })
+     .catch(err => alert(err))
+     .then(() => updateState());
+ }
+
+ function updateState() {
+   return ffetch("/api/state").then(state => {
+     setState(state);
+     setPlayers(state);
+   }).catch(err => {
+     alert(err);
+     setTimeout(() => updateState(), 1000);
+   });
+ }
+
+ function setPlayers(state) {
+   elem("#team-a-1").src = state.Set.P1.Avatar;
+   elem("#team-a-2").src = state.Set.P2.Avatar;
+   elem("#team-b-1").src = state.Set.P3.Avatar;
+   elem("#team-b-2").src = state.Set.P4.Avatar;
+ }
+
+ function setState(state) {
+   const numGames = state.Games.length;
+    if (numGames == 0) {
+      return window.location = '/ranking.html';
+    }
+   let TeamAWins = 0;
+   let TeamBWins = 0;
+   for (const game of state.Games) {
+     if (game.GoalsA == 6) TeamAWins += 1;
+     if (game.GoalsB == 6) TeamBWins += 1;
+   }
+
+   elem("#game-score").textContent = `${state.Games[numGames - 1].GoalsA} : ${state.Games[numGames - 1].GoalsB}`;
+   elem("#set-score").textContent = `${TeamAWins} : ${TeamBWins}`;
+ }
+
+ function ffetch(url, options) {
+   return fetch(url, options).then(response => {
+     return response.text().then(body => response.ok ? JSON.parse(body) : Promise.reject(body))
+   });
+ }
+</script>
