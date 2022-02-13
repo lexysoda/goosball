@@ -13,7 +13,6 @@
    body {
      display: grid;
      grid-template-areas:
-       "menu"
        "game"
        "queue"
        "main"
@@ -24,9 +23,8 @@
      body {
        display: grid;
        grid-template-columns: 3fr 1fr;
-       grid-template-rows: 5vh 1fr 5fr 5fr;
+       grid-template-rows: 1fr 5fr 5fr;
        grid-template-areas:
-         "menu   menu"
          "main   game"
          "main   queue"
          "main   recent";
@@ -67,22 +65,9 @@
      height: 100%;
    }
 
-   #menu {
-     grid-area: menu;
-     display: flex;
-     flex-direction: row;
-     justify-content: space-around;
-     font-size: 5vh;
-   }
-
    h1 {
      font-size: 5vmin;
      margin-left: 0.25em;
-   }
-
-   #menu > * {
-     display: inline-block;
-     cursor: pointer;
    }
 
    .avatar {
@@ -150,9 +135,6 @@
   </style>
 </head>
 <body>
-  <div id="menu">
-    <div onclick="window.location='/index.html';">game</div>
-  </div>
   <div id="main">
     <h1>Players</h1>
     <div id="player-list"></div>
@@ -187,6 +169,9 @@
      recent.innerHTML = '';
     return ffetch("/api/state")
          .then(state => {
+           if (state.Set) {
+            window.location = '/index.html';
+           }
           state.Queue.forEach((user, i) => 
              queue.appendChild(playerRow(removeFromQueue, addScore(user), i+1)))
            });
