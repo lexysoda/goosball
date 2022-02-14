@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/lexysoda/goskill"
 
@@ -18,7 +19,9 @@ func main() {
 		log.Fatal(err)
 	}
 	users := []string{"U02QK2J4BRD", "U02NPU059QT", "U029URUKJLF", "UB048064V"}
-	c := &controller.Controller{Db: db, Elo: goskill.New(), Slack: slack.Init()}
+	s := slack.Init()
+	c := &controller.Controller{Db: db, Elo: goskill.New(), Slack: s, SlackHome: os.Getenv("SLACK_HOME_CHANNEL")}
+	c.Init()
 	for _, id := range users {
 		u, err := c.GetOrCreateUser(id)
 		if err != nil {
