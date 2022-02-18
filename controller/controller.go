@@ -12,14 +12,16 @@ import (
 	"github.com/lexysoda/goosball/db"
 	"github.com/lexysoda/goosball/model"
 	"github.com/lexysoda/goosball/slack"
+	"github.com/lexysoda/goosball/slack/api"
 	"github.com/lexysoda/goskill"
 )
 
 type Controller struct {
-	Db    db.DB
-	State State
-	Elo   goskill.BradleyTerryFull
-	Slack *slack.Slack
+	Db       db.DB
+	State    State
+	Elo      goskill.BradleyTerryFull
+	SlackAPI *api.Slack
+	Slack    *slack.Slack
 	sync.Mutex
 	SlackHome string
 	messages  chan slack.SlackMessage
@@ -89,7 +91,7 @@ func (c *Controller) GetOrCreateUser(id string) (*model.User, error) {
 	} else if !errors.Is(err, db.NoRow) {
 		return nil, err
 	}
-	uNew, err := c.Slack.GetUser(id)
+	uNew, err := c.SlackAPI.GetUser(id)
 	if err != nil {
 		return nil, err
 	}
@@ -244,7 +246,7 @@ func (c *Controller) CancelSet() {
 
 func (c *Controller) SendQueueSlack() {
 	if len(c.State.Queue) == 0 {
-		err := c.Slack.Send(c.SlackHome, "The queue is empty.")
+		err := c.SlackAPI.Send(c.SlackHome, "The queue is empty.")
 		if err != nil {
 			log.Printf("Failed to send slack message: %s\n", err)
 		}
@@ -258,7 +260,7 @@ func (c *Controller) SendQueueSlack() {
 		}
 	}
 	message += "."
-	err := c.Slack.Send(c.SlackHome, message)
+	err := c.SlackAPI.Send(c.SlackHome, message)
 	if err != nil {
 		log.Printf("Failed to send slack message: %s\n", err)
 	}

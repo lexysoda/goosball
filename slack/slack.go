@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/lexysoda/goosball/model"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 	"github.com/slack-go/slack/socketmode"
@@ -27,22 +26,6 @@ func Init() *Slack {
 	)}
 	go s.Start()
 	return s
-}
-
-func (s *Slack) GetUser(id string) (*model.User, error) {
-	userProfile, err := s.GetUserProfile(&slack.GetUserProfileParameters{
-		UserID:        id,
-		IncludeLabels: false,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return &model.User{
-		ID:          id,
-		RealName:    userProfile.RealName,
-		DisplayName: userProfile.DisplayName,
-		Avatar:      userProfile.Image512,
-	}, nil
 }
 
 func (s *Slack) Start() {
@@ -88,12 +71,6 @@ func (s *Slack) Start() {
 		}
 	}()
 	client.Run()
-}
-
-func (s *Slack) Send(channel, message string) error {
-	text := slack.MsgOptionText(message, false)
-	_, _, err := s.PostMessage(channel, text)
-	return err
 }
 
 func (s *Slack) RegisterMessageReceiver(c chan SlackMessage) {

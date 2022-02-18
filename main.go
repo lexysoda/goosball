@@ -11,6 +11,7 @@ import (
 	"github.com/lexysoda/goosball/controller"
 	"github.com/lexysoda/goosball/db"
 	"github.com/lexysoda/goosball/slack"
+	sapi "github.com/lexysoda/goosball/slack/api"
 )
 
 func main() {
@@ -20,7 +21,13 @@ func main() {
 	}
 	users := []string{"U02QK2J4BRD", "U02NPU059QT", "U029URUKJLF", "UB048064V"}
 	s := slack.Init()
-	c := &controller.Controller{Db: db, Elo: goskill.New(), Slack: s, SlackHome: os.Getenv("SLACK_HOME_CHANNEL")}
+	c := &controller.Controller{
+		Db:        db,
+		Elo:       goskill.New(),
+		SlackAPI:  sapi.New(),
+		Slack:     s,
+		SlackHome: os.Getenv("SLACK_HOME_CHANNEL"),
+	}
 	c.Init()
 	for _, id := range users {
 		u, err := c.GetOrCreateUser(id)
