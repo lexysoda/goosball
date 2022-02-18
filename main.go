@@ -26,7 +26,7 @@ func main() {
 		SlackHome: os.Getenv("SLACK_HOME_CHANNEL"),
 	}
 	_ = bot.New(c)
-	_ = api.New(c)
+	a := api.New(c)
 	http.Handle("/api/", http.StripPrefix("/api", a))
 	http.Handle("/", http.FileServer(http.Dir("static")))
 	log.Fatal(http.ListenAndServe(":1337", nil))
