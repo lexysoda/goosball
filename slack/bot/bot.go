@@ -41,6 +41,8 @@ func (s *Slack) start() {
 				log.Println("Connection failed. Retrying later...")
 			case socketmode.EventTypeConnected:
 				log.Println("Connected to Slack with Socket Mode.")
+			case socketmode.EventTypeHello:
+				log.Println("Got hello event.")
 			case socketmode.EventTypeEventsAPI:
 				eventsAPIEvent, ok := evt.Data.(slackevents.EventsAPIEvent)
 				if !ok {
