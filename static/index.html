@@ -150,10 +150,9 @@ function cancel() {
  }
 
  function setState(state) {
-   const numGames = state.Games.length;
-    if (numGames == 0) {
-      return window.location = '/ranking.html';
-    }
+   if (!state.Set) {
+    return window.location = '/ranking.html';
+   }
    let TeamAWins = 0;
    let TeamBWins = 0;
    for (const game of state.Games) {
@@ -161,6 +160,7 @@ function cancel() {
      if (game.GoalsB == 6) TeamBWins += 1;
    }
 
+   const numGames = state.Games.length;
    elem("#game-score").textContent = `${state.Games[numGames - 1].GoalsA} : ${state.Games[numGames - 1].GoalsB}`;
    elem("#set-score").textContent = `${TeamAWins} : ${TeamBWins}`;
  }
