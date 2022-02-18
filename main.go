@@ -10,8 +10,8 @@ import (
 	"github.com/lexysoda/goosball/api"
 	"github.com/lexysoda/goosball/controller"
 	"github.com/lexysoda/goosball/db"
-	"github.com/lexysoda/goosball/slack"
 	sapi "github.com/lexysoda/goosball/slack/api"
+	"github.com/lexysoda/goosball/slack/bot"
 )
 
 func main() {
@@ -20,15 +20,13 @@ func main() {
 		log.Fatal(err)
 	}
 	users := []string{"U02QK2J4BRD", "U02NPU059QT", "U029URUKJLF", "UB048064V"}
-	s := slack.Init()
 	c := &controller.Controller{
 		Db:        db,
 		Elo:       goskill.New(),
 		SlackAPI:  sapi.New(),
-		Slack:     s,
 		SlackHome: os.Getenv("SLACK_HOME_CHANNEL"),
 	}
-	c.Init()
+	_ = bot.New(c)
 	for _, id := range users {
 		u, err := c.GetOrCreateUser(id)
 		if err != nil {

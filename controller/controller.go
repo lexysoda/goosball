@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"regexp"
 	"sync"
 	"time"
 
@@ -21,7 +20,6 @@ type Controller struct {
 	State    State
 	Elo      goskill.BradleyTerryFull
 	SlackAPI *api.Slack
-	Slack    *slack.Slack
 	sync.Mutex
 	SlackHome string
 	messages  chan slack.SlackMessage
@@ -31,53 +29,6 @@ type State struct {
 	Queue []model.User
 	Games []model.Game
 	Set   *model.Set
-}
-
-var messageRegex = regexp.MustCompile(`^<@(\w+)>\s*(\w+)\s*(?:<@(\w+)>\s*)*$`)
-
-func (c *Controller) Init() {
-	ch := make(chan slack.SlackMessage, 10)
-	c.Slack.RegisterMessageReceiver(ch)
-	go func() {
-		for m := range ch {
-			c.HandleMessage(m)
-		}
-	}()
-}
-
-func (c *Controller) HandleMessage(m slack.SlackMessage) {
-	args := messageRegex.FindStringSubmatch(m.Text)
-	log.Println(m)
-	log.Println(args)
-	if args == nil || len(args) < 3 {
-		return
-	}
-	switch args[2] {
-	case "play":
-		err := c.AddToQueue(m.Sender)
-		if err != nil {
-			log.Println(err)
-		}
-		c.SendQueueSlack()
-	case "queue":
-		c.SendQueueSlack()
-	case "cancel":
-		c.CancelSet()
-		c.SendQueueSlack()
-	case "add":
-		if len(args) < 4 {
-			return
-		}
-		err := c.AddToQueue(args[3:]...)
-		if err != nil {
-			log.Println(err)
-		}
-		c.SendQueueSlack()
-	case "remove":
-		log.Println("not implemented")
-	default:
-		log.Println("Unknown command")
-	}
 }
 
 func (c *Controller) GetAllUsers() ([]model.User, error) {
