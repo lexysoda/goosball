@@ -13,7 +13,8 @@ type Api struct {
 	controller *controller.Controller
 }
 
-func (a *Api) Init(c *controller.Controller) {
+func New(c *controller.Controller) *Api {
+	a := &Api{}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/state", a.GetState)
 	mux.HandleFunc("/score", a.Score)
@@ -23,6 +24,7 @@ func (a *Api) Init(c *controller.Controller) {
 	mux.HandleFunc("/set", a.CancelSet)
 	a.ServeMux = mux
 	a.controller = c
+	return a
 }
 
 func (a *Api) GetState(w http.ResponseWriter, r *http.Request) {

@@ -50,8 +50,7 @@ func main() {
 		log.Printf("User: %s, Mu: %g, SigSq: %g\n", uGot.RealName, uGot.Skill.Mu, uGot.Skill.SigSq)
 	}
 
-	a := &api.Api{}
-	a.Init(c)
+	_ = api.New(c)
 	http.Handle("/api/", http.StripPrefix("/api", a))
 	http.Handle("/", http.FileServer(http.Dir("static")))
 	log.Fatal(http.ListenAndServe(":1337", nil))
