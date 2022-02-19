@@ -57,18 +57,40 @@
      cursor: pointer;
    }
 
-   #game-score {
+   #game {
      display: flex;
-     flex-direction: row;
+     flex-direction: column;
      justify-content: space-around;
      font-size: 30vmin;
    }
 
-   #set-score {
+   #game > * {
      display: flex;
      flex-direction: row;
      justify-content: space-around;
+     align-items: center;
+   }
+
+   #game-name {
+     font-size: 5vmin;
+   }
+   
+   #set-name {
+     font-size: 3vmin;
+   }
+
+   #set {
+     display: flex;
+     flex-direction: column;
+     justify-content: space-around;
      font-size: 15vmin;
+   }
+
+   #set > * {
+     display: flex;
+     flex-direction: row;
+     justify-content: space-around;
+     align-items: center;
    }
 
    .avatar {
@@ -91,9 +113,7 @@
 </head>
 <body>
   <div id="menu">
-    <div onclick="unscore();">unscore</div>
     <div onclick="cancel();">cancel</div>
-    <div onclick="window.location='ranking.html';">ranking</div>
   </div>
 
   <div id="team-a" class="team">
@@ -102,8 +122,14 @@
   </div>
 
   <div id="center">
-    <div id="set-score"></div>
-    <div id="game-score"></div>
+    <div id="set">
+      <div id="set-name"> Set </div>
+      <div id="set-score"></div>
+    </div>
+    <div id="game">
+      <div id="game-name"> Game </div>
+      <div id="game-score"></div>
+    </div>
   </div>
 
   <div id="team-b" class="team">
