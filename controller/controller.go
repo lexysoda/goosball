@@ -161,6 +161,15 @@ func (c *Controller) FinishGame(isTeamA bool) error {
 	log.Printf("%s and %s won!\n", p1.DisplayName, p2.DisplayName)
 	g := &c.State.Games[len(c.State.Games)-1]
 	g.EndTime = time.Now()
+	if g.GoalsA == 0 || g.GoalsB == 0 {
+		c.SlackAPI.Send(c.SlackHome,
+			fmt.Sprintf(
+				"<@%s> and <@%s> have to crawl. shame.",
+				p1.ID,
+				p2.ID,
+			),
+		)
+	}
 	if len(c.State.Games) == 2 &&
 		(isTeamA && c.State.Games[0].GoalsA == 6 ||
 			!isTeamA && c.State.Games[0].GoalsB == 6) {
