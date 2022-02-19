@@ -33,7 +33,7 @@ func (c *Controller) GetAllUsers() ([]model.User, error) {
 	return c.Db.GetUsers()
 }
 
-func (c *Controller) GetOrCreateUser(id string) (*model.User, error) {
+func (c *Controller) getOrCreateUser(id string) (*model.User, error) {
 	uGot, err := c.Db.GetUser(id)
 	if err == nil {
 		return uGot, nil
@@ -48,25 +48,27 @@ func (c *Controller) GetOrCreateUser(id string) (*model.User, error) {
 	return uNew, c.Db.AddUser(uNew)
 }
 
-func (c *Controller) AddToQueue(ids ...string) error {
+func (c *Controller) AddToQueue(ids ...string) {
 	c.Lock()
 	defer c.Unlock()
 	for _, id := range ids {
-		user, err := c.GetOrCreateUser(id)
+		user, err := c.getOrCreateUser(id)
 		if err != nil {
-			return err
+			log.Println("Failed to get or create user %s: %s\n", id, err)
 		}
 		for _, uq := range c.State.Queue {
 			if uq.ID == user.ID {
-				return fmt.Errorf("User %s already in Queue", uq.DisplayName)
+				continue
 			}
 		}
 		c.State.Queue = append(c.State.Queue, *user)
 	}
 	if len(c.State.Queue) >= 4 && c.State.Set == nil {
 		c.StartMatch()
+		return
 	}
-	return nil
+	c.SendQueueSlack()
+	return
 }
 
 func (c *Controller) RemoveFromQueue(id string) {
@@ -79,6 +81,7 @@ func (c *Controller) RemoveFromQueue(id string) {
 		}
 	}
 	c.State.Queue = newQueue
+	c.SendQueueSlack()
 }
 
 func (c *Controller) StartMatch() {
@@ -104,7 +107,16 @@ func (c *Controller) StartMatch() {
 		P4: p[perm[3]],
 	}
 	c.State.Set = &Set
-	log.Printf("%s and %s playing against %s and %s\n", Set.P1.DisplayName, Set.P2.DisplayName, Set.P3.DisplayName, Set.P4.DisplayName)
+	log.Printf(
+		"%s and %s playing against %s and %s\n",
+		Set.P1.DisplayName,
+		Set.P2.DisplayName,
+		Set.P3.DisplayName,
+		Set.P4.DisplayName)
+	c.SlackAPI.Send(
+		c.SlackHome,
+		fmt.Sprintf("A new game started: <@%s> <@%s> vs <@%s> <@%s>"),
+	)
 	c.NewGame()
 }
 
@@ -191,6 +203,8 @@ func (c *Controller) CancelSet() {
 	c.State.Set = nil
 	c.State.Games = []model.Game{}
 	c.Unlock()
+	c.SlackAPI.Send(c.SlackHome, "The current game was canceled.")
+	c.SendQueueSlack()
 }
 
 func (c *Controller) SendQueueSlack() {

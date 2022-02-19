@@ -77,16 +77,11 @@ func (s *Slack) handleMessage(user, text string) {
 	}
 	switch cmd[2] {
 	case "play":
-		err := s.controller.AddToQueue(user)
-		if err != nil {
-			log.Println(err)
-		}
-		s.controller.SendQueueSlack()
+		s.controller.AddToQueue(user)
 	case "queue":
 		s.controller.SendQueueSlack()
 	case "cancel":
 		s.controller.CancelSet()
-		s.controller.SendQueueSlack()
 	case "add":
 		matches := usersRegex.FindAllStringSubmatch(cmd[3], -1)
 		if matches == nil {
@@ -96,13 +91,9 @@ func (s *Slack) handleMessage(user, text string) {
 		for _, m := range matches {
 			users = append(users, m[1])
 		}
-		err := s.controller.AddToQueue(users...)
-		if err != nil {
-			log.Println(err)
-		}
-		s.controller.SendQueueSlack()
+		s.controller.AddToQueue(users...)
 	case "remove":
-		log.Println("not implemented")
+		s.controller.RemoveFromQueue(user)
 	default:
 		log.Println("Unknown command")
 	}

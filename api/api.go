@@ -59,9 +59,7 @@ func (a *Api) Queue(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	if err := a.controller.AddToQueue(userId); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	}
+	a.controller.AddToQueue(userId)
 }
 
 func (a *Api) Users(w http.ResponseWriter, r *http.Request) {
