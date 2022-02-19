@@ -51,6 +51,7 @@ func (c *Controller) getOrCreateUser(id string) (*model.User, error) {
 func (c *Controller) AddToQueue(ids ...string) {
 	c.Lock()
 	defer c.Unlock()
+loop:
 	for _, id := range ids {
 		user, err := c.getOrCreateUser(id)
 		if err != nil {
@@ -58,7 +59,7 @@ func (c *Controller) AddToQueue(ids ...string) {
 		}
 		for _, uq := range c.State.Queue {
 			if uq.ID == user.ID {
-				continue
+				continue loop
 			}
 		}
 		c.State.Queue = append(c.State.Queue, *user)
