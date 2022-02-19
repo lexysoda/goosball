@@ -10,7 +10,6 @@ import (
 
 	"github.com/lexysoda/goosball/db"
 	"github.com/lexysoda/goosball/model"
-	"github.com/lexysoda/goosball/slack"
 	"github.com/lexysoda/goosball/slack/api"
 	"github.com/lexysoda/goskill"
 )
@@ -22,7 +21,6 @@ type Controller struct {
 	SlackAPI *api.Slack
 	sync.Mutex
 	SlackHome string
-	messages  chan slack.SlackMessage
 }
 
 type State struct {
