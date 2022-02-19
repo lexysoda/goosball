@@ -29,5 +29,5 @@ func main() {
 	a := api.New(c)
 	http.Handle("/api/", http.StripPrefix("/api", a))
 	http.Handle("/", http.FileServer(http.Dir("static")))
-	log.Fatal(http.ListenAndServe(":1337", nil))
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
