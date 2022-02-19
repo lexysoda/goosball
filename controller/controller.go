@@ -188,8 +188,26 @@ func (c *Controller) FinishSet(isTeamA bool) error {
 	teamA := []*goskill.Skill{&c.State.Set.P1.Skill, &c.State.Set.P2.Skill}
 	teamB := []*goskill.Skill{&c.State.Set.P3.Skill, &c.State.Set.P4.Skill}
 	if isTeamA {
+		c.SlackAPI.Send(c.SlackHome,
+			fmt.Sprintf(
+				"<@%s> and <@%s> won against <@%s> and <@%s>!",
+				c.State.Set.P1.ID,
+				c.State.Set.P2.ID,
+				c.State.Set.P3.ID,
+				c.State.Set.P4.ID,
+			),
+		)
 		c.Elo.Rank([][]*goskill.Skill{teamA, teamB})
 	} else {
+		c.SlackAPI.Send(c.SlackHome,
+			fmt.Sprintf(
+				"<@%s> and <@%s> won against <@%s> and <@%s>!",
+				c.State.Set.P3.ID,
+				c.State.Set.P1.ID,
+				c.State.Set.P2.ID,
+				c.State.Set.P4.ID,
+			),
+		)
 		c.Elo.Rank([][]*goskill.Skill{teamB, teamA})
 	}
 	c.Db.UpdateUser(&c.State.Set.P1)
