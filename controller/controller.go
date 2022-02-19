@@ -154,14 +154,13 @@ func (c *Controller) Score(isTeamA bool) error {
 }
 
 func (c *Controller) FinishGame(isTeamA bool) error {
-	p1, p2 := c.State.Set.P1, c.State.Set.P2
-	if !isTeamA {
-		p1, p2 = c.State.Set.P3, c.State.Set.P4
-	}
-	log.Printf("%s and %s won!\n", p1.DisplayName, p2.DisplayName)
 	g := &c.State.Games[len(c.State.Games)-1]
 	g.EndTime = time.Now()
 	if g.GoalsA == 0 || g.GoalsB == 0 {
+		p1, p2 := c.State.Set.P1, c.State.Set.P2
+		if isTeamA {
+			p1, p2 = c.State.Set.P3, c.State.Set.P4
+		}
 		c.SlackAPI.Send(c.SlackHome,
 			fmt.Sprintf(
 				"<@%s> and <@%s> have to crawl. shame.",
@@ -212,9 +211,9 @@ func (c *Controller) FinishSet(isTeamA bool) error {
 			fmt.Sprintf(
 				"<@%s> and <@%s> won against <@%s> and <@%s>!",
 				c.State.Set.P3.ID,
+				c.State.Set.P4.ID,
 				c.State.Set.P1.ID,
 				c.State.Set.P2.ID,
-				c.State.Set.P4.ID,
 			),
 		)
 		c.Elo.Rank([][]*goskill.Skill{teamB, teamA})
