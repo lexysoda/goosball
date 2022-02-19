@@ -108,15 +108,19 @@ func (c *Controller) StartMatch() {
 		P4: p[perm[3]],
 	}
 	c.State.Set = &Set
-	log.Printf(
-		"%s and %s playing against %s and %s\n",
+	log.Printf("%s and %s playing against %s and %s\n",
 		Set.P1.DisplayName,
 		Set.P2.DisplayName,
 		Set.P3.DisplayName,
-		Set.P4.DisplayName)
-	c.SlackAPI.Send(
-		c.SlackHome,
-		fmt.Sprintf("A new game started: <@%s> <@%s> vs <@%s> <@%s>"),
+		Set.P4.DisplayName,
+	)
+	c.SlackAPI.Send(c.SlackHome,
+		fmt.Sprintf("A new game started: <@%s> <@%s> vs <@%s> <@%s>",
+			Set.P1.ID,
+			Set.P2.ID,
+			Set.P3.ID,
+			Set.P4.ID,
+		),
 	)
 	c.NewGame()
 }
