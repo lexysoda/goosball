@@ -22,7 +22,7 @@
        grid-template-columns: 1fr 3fr 1fr;
        grid-template-rows: 5vh 10fr;
        grid-template-areas:
-         "menu menu menu"
+         "team-a menu team-b"
          "team-a center team-b";
      }
      .team {
@@ -187,8 +187,19 @@ function cancel() {
    }
 
    const numGames = state.Games.length;
-   elem("#game-score").textContent = `${state.Games[numGames - 1].GoalsA} : ${state.Games[numGames - 1].GoalsB}`;
-   elem("#set-score").textContent = `${TeamAWins} : ${TeamBWins}`;
+   const swap = numGames === 2
+   const [LeftWins, RightWins] = swap ? [TeamBWins, TeamAWins] : [TeamAWins, TeamBWins];
+   const [LeftScore, RightScore] = swap ? 
+       [state.Games[numGames - 1].GoalsB, state.Games[numGames - 1].GoalsA] :
+       [state.Games[numGames - 1].GoalsA, state.Games[numGames - 1].GoalsB];
+
+   elem("#game-score").textContent = `${LeftScore} : ${RightScore}`;
+   elem("#set-score").textContent = `${LeftWins} : ${RightWins}`;
+
+   elem("#team-a").style['grid-area'] = swap ? "team-b" : "team-a";
+   elem("#team-b").style['grid-area'] = swap ? "team-a" : "team-b";
+   elem("#team-a").style['background'] = swap ? "lightgray" : "none";
+   elem("#team-b").style['background'] = swap ? "none" : "lightgray";
  }
 
  function ffetch(url, options) {
