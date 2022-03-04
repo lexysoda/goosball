@@ -160,6 +160,9 @@ function cancel() {
 
  function updateState() {
    return ffetch("/api/state").then(state => {
+     if (!state.Set) {
+       return window.location = '/ranking.html';
+     }
      setState(state);
      setPlayers(state);
    }).catch(err => {
@@ -176,9 +179,6 @@ function cancel() {
  }
 
  function setState(state) {
-   if (!state.Set) {
-    return window.location = '/ranking.html';
-   }
    let TeamAWins = 0;
    let TeamBWins = 0;
    for (const game of state.Games) {
