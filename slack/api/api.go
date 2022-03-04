@@ -1,8 +1,6 @@
 package api
 
 import (
-	"os"
-
 	"github.com/lexysoda/goosball/model"
 	"github.com/slack-go/slack"
 )
@@ -11,8 +9,8 @@ type Slack struct {
 	s *slack.Client
 }
 
-func New() *Slack {
-	return &Slack{slack.New(os.Getenv("SLACK_TOKEN"))}
+func New(token string) *Slack {
+	return &Slack{slack.New(token)}
 }
 
 func (s *Slack) Send(channel, message string) error {

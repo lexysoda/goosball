@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 
+	"github.com/kelseyhightower/envconfig"
 	"github.com/lexysoda/goskill"
 
 	"github.com/lexysoda/goosball/api"
@@ -14,20 +14,33 @@ import (
 	"github.com/lexysoda/goosball/slack/bot"
 )
 
+type config struct {
+	SlackHomeChannel string `required:"true" split_words:"true"`
+	Address          string `default:":8080"`
+	DBPath           string `default:"./goosball.db" split_words:"true"`
+	SlackToken       string `required:"true" split_words:"true"`
+	SlackAppToken    string `required:"true" split_words:"true"`
+}
+
 func main() {
-	db, err := db.New()
+	config := config{}
+	if err := envconfig.Process("goosball", &config); err != nil {
+		log.Fatal(err)
+	}
+	log.Println(config.Address)
+	db, err := db.New(config.DBPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 	c := &controller.Controller{
 		Db:        db,
 		Elo:       goskill.New(),
-		SlackAPI:  sapi.New(),
-		SlackHome: os.Getenv("SLACK_HOME_CHANNEL"),
+		SlackAPI:  sapi.New(config.SlackToken),
+		SlackHome: config.SlackHomeChannel,
 	}
-	_ = bot.New(c)
+	_ = bot.New(c, config.SlackToken, config.SlackAppToken)
 	a := api.New(c)
 	http.Handle("/api/", http.StripPrefix("/api", a))
 	http.Handle("/", http.FileServer(http.Dir("static")))
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(config.Address, nil))
 }

@@ -14,8 +14,8 @@ type DB struct {
 	*sql.DB
 }
 
-func New() (DB, error) {
-	db, err := sql.Open("sqlite", "goosball.db")
+func New(dbPath string) (DB, error) {
+	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		return DB{}, err
 	}

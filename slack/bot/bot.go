@@ -2,7 +2,6 @@ package bot
 
 import (
 	"log"
-	"os"
 	"regexp"
 
 	"github.com/lexysoda/goosball/controller"
@@ -19,11 +18,11 @@ type Slack struct {
 var commandRegex = regexp.MustCompile(`^<@(\w+)>\s*(\w+)\s*(.*)$`)
 var usersRegex = regexp.MustCompile(`<@(\w+)>`)
 
-func New(c *controller.Controller) *Slack {
+func New(c *controller.Controller, token, appToken string) *Slack {
 	s := &Slack{
 		client: socketmode.New(slack.New(
-			os.Getenv("SLACK_TOKEN"),
-			slack.OptionAppLevelToken(os.Getenv("SLACK_APP_TOKEN")),
+			token,
+			slack.OptionAppLevelToken(appToken),
 		)),
 		controller: c,
 	}
