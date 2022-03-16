@@ -11,7 +11,11 @@ type User struct {
 	DisplayName string
 	RealName    string
 	Avatar      string
-	Skill       goskill.Skill
+	Goskill     goskill.Skill
+}
+
+func (u User) Skill() *goskill.Skill {
+	return &u.Goskill
 }
 
 type Set struct {

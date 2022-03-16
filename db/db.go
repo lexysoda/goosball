@@ -29,8 +29,8 @@ func (db *DB) AddUser(u *model.User) error {
 		u.DisplayName,
 		u.RealName,
 		u.Avatar,
-		u.Skill.Mu,
-		u.Skill.SigSq,
+		u.Goskill.Mu,
+		u.Goskill.SigSq,
 	)
 	return err
 }
@@ -42,8 +42,8 @@ func (db *DB) UpdateUser(u *model.User) error {
 		u.DisplayName,
 		u.RealName,
 		u.Avatar,
-		u.Skill.Mu,
-		u.Skill.SigSq,
+		u.Goskill.Mu,
+		u.Goskill.SigSq,
 	)
 	return err
 }
@@ -55,8 +55,8 @@ func (db *DB) GetUser(id string) (*model.User, error) {
 		&uGot.DisplayName,
 		&uGot.RealName,
 		&uGot.Avatar,
-		&uGot.Skill.Mu,
-		&uGot.Skill.SigSq,
+		&uGot.Goskill.Mu,
+		&uGot.Goskill.SigSq,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, NoRow
@@ -78,8 +78,8 @@ func (db *DB) GetUsers() ([]model.User, error) {
 			&u.DisplayName,
 			&u.RealName,
 			&u.Avatar,
-			&u.Skill.Mu,
-			&u.Skill.SigSq,
+			&u.Goskill.Mu,
+			&u.Goskill.SigSq,
 		); err != nil {
 			return users, err
 		}

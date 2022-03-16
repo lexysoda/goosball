@@ -12,6 +12,8 @@ github.com/kelseyhightower/envconfig v1.4.0 h1:Im6hONhd3pLkfDFsbRgu68RDNkGF1r3dv
 github.com/kelseyhightower/envconfig v1.4.0/go.mod h1:cccZRl6mQpaq41TPp5QxidR+Sa3axMbJDNb//FQX6Gg=
 github.com/lexysoda/goskill v0.0.0-20220127113014-af7d75cade8a h1:TYTqV/wsRn1kZJNqIDMgeAW8iumEoD8FzjHdUxeM/J0=
 github.com/lexysoda/goskill v0.0.0-20220127113014-af7d75cade8a/go.mod h1:vLvn/NJNK4BgpG/jPZ3sb7MzdqUwOwCkXBWwOCBlQl4=
+github.com/lexysoda/goskill v0.0.0-20220316132102-acdbe5dc796b h1:L03JbR1NLVCy0qIagg0JjN6aho/l+OS/+wO9+EUEvK8=
+github.com/lexysoda/goskill v0.0.0-20220316132102-acdbe5dc796b/go.mod h1:vLvn/NJNK4BgpG/jPZ3sb7MzdqUwOwCkXBWwOCBlQl4=
 github.com/mattn/go-isatty v0.0.12 h1:wuysRhFDzyxgEmMf5xjvJ2M9dZoWAXNNr5LSBS7uHXY=
 github.com/mattn/go-isatty v0.0.12/go.mod h1:cbi8OIDigv2wuxKPP5vlRcQ1OAZbq2CE4Kysco4FUpU=
 github.com/mattn/go-sqlite3 v1.14.10/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=

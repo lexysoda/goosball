@@ -17,7 +17,7 @@ import (
 type Controller struct {
 	Db       db.DB
 	State    State
-	Elo      goskill.BradleyTerryFull
+	Elo      goskill.BTFull
 	SlackAPI *api.Slack
 	sync.Mutex
 	SlackHome string
@@ -44,7 +44,7 @@ func (c *Controller) getOrCreateUser(id string) (*model.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	uNew.Skill = c.Elo.Skill()
+	uNew.Goskill = c.Elo.Skill()
 	return uNew, c.Db.AddUser(uNew)
 }
 
@@ -88,12 +88,9 @@ func (c *Controller) RemoveFromQueue(id string) {
 func (c *Controller) StartMatch() {
 	p := c.State.Queue[:4]
 	c.State.Queue = c.State.Queue[4:]
-	m1 := math.Abs(c.Elo.WinProbability(
-		[]*goskill.Skill{&p[0].Skill, &p[1].Skill}, []*goskill.Skill{&p[2].Skill, &p[3].Skill}) - 0.5)
-	m2 := math.Abs(c.Elo.WinProbability(
-		[]*goskill.Skill{&p[0].Skill, &p[2].Skill}, []*goskill.Skill{&p[1].Skill, &p[3].Skill}) - 0.5)
-	m3 := math.Abs(c.Elo.WinProbability(
-		[]*goskill.Skill{&p[0].Skill, &p[3].Skill}, []*goskill.Skill{&p[1].Skill, &p[2].Skill}) - 0.5)
+	m1 := math.Abs(c.Elo.WinProbability([]goskill.Skiller{p[0], p[1]}, []goskill.Skiller{p[2], p[3]}) - 0.5)
+	m2 := math.Abs(c.Elo.WinProbability([]goskill.Skiller{p[0], p[2]}, []goskill.Skiller{p[1], p[3]}) - 0.5)
+	m3 := math.Abs(c.Elo.WinProbability([]goskill.Skiller{p[0], p[3]}, []goskill.Skiller{p[1], p[2]}) - 0.5)
 
 	perm := [4]int{0, 3, 1, 2}
 	if m1 <= m2 && m1 <= m3 {
@@ -193,8 +190,8 @@ func (c *Controller) FinishSet(isTeamA bool) error {
 			log.Fatal(err)
 		}
 	}
-	teamA := []*goskill.Skill{&c.State.Set.P1.Skill, &c.State.Set.P2.Skill}
-	teamB := []*goskill.Skill{&c.State.Set.P3.Skill, &c.State.Set.P4.Skill}
+	teamA := []goskill.Skiller{c.State.Set.P1, c.State.Set.P2}
+	teamB := []goskill.Skiller{c.State.Set.P3, c.State.Set.P4}
 	if isTeamA {
 		c.SlackAPI.Send(c.SlackHome,
 			fmt.Sprintf(
@@ -205,7 +202,7 @@ func (c *Controller) FinishSet(isTeamA bool) error {
 				c.State.Set.P4.ID,
 			),
 		)
-		c.Elo.Rank([][]*goskill.Skill{teamA, teamB})
+		c.Elo.Rank([][]goskill.Skiller{teamA, teamB})
 	} else {
 		c.SlackAPI.Send(c.SlackHome,
 			fmt.Sprintf(
@@ -216,7 +213,7 @@ func (c *Controller) FinishSet(isTeamA bool) error {
 				c.State.Set.P2.ID,
 			),
 		)
-		c.Elo.Rank([][]*goskill.Skill{teamB, teamA})
+		c.Elo.Rank([][]goskill.Skiller{teamB, teamA})
 	}
 	c.Db.UpdateUser(&c.State.Set.P1)
 	c.Db.UpdateUser(&c.State.Set.P2)
