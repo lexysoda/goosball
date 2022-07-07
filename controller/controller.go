@@ -23,10 +23,16 @@ type Controller struct {
 	SlackHome string
 }
 
-type State struct {
-	Queue []model.User
-	Games []model.Game
+type Recent struct {
 	Set   *model.Set
+	Games []model.Game
+}
+
+type State struct {
+	Queue   []model.User
+	Games   []model.Game
+	Set     *model.Set
+	Recents []Recent
 }
 
 func (c *Controller) GetAllUsers() ([]model.User, error) {
@@ -223,6 +229,12 @@ func (c *Controller) FinishSet(isTeamA bool) error {
 	c.Db.UpdateUser(&c.State.Set.P3)
 	c.Db.UpdateUser(&c.State.Set.P4)
 
+	r := []Recent{Recent{c.State.Set, c.State.Games}}
+	index := 2
+	if l := len(c.State.Recents); l < 3 {
+		index = l
+	}
+	c.State.Recents = append(r, c.State.Recents[:index]...)
 	c.State.Games = []model.Game{}
 	c.State.Set = nil
 

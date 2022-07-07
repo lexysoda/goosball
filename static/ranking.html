@@ -174,28 +174,42 @@
            }
           state.Queue.forEach((user, i) => 
              queue.appendChild(playerRow(removeFromQueue, addScore(user), i+1)))
+           state.Recents.forEach(({Set, Games}) => {
+             const scores = Games.map((g) => [g.GoalsA, g.GoalsB]);
+            recent.appendChild(teamRow([Set.P1, Set.P2, Set.P3, Set.P4], scores));
            });
+         });
      })}
 
- function teamRow(teamA, teamB) {
+ function teamRow(players, scores) {
    const x = document.createElement("div");
    const player = (user) => {
-     user = addScore(user);
      return `
         <div class="player">
-        <img class="avatar" src="${user.Avatar}" alt="${user.Name}" title="${user.Name}">
-        <span class="skill">${user.Score.toFixed(2)} (${user.Sigma.toFixed(2)})</span>
+        <img class="avatar" src="${user.Avatar}" alt="${user.RealName}" title="${user.DisplayName}">
         </div>`;
    };
+    const y = document.createElement("div");
+    scores.forEach(([a, b]) => {
+        const score = document.createElement("div");
+        if (a === 6) {
+            score.innerHTML = `<b>${a}</b> - ${b}`;
+        } else {
+            score.innerHTML = `${a} - <b>${b}</b>`;
+        }
+        y.appendChild(score);
+      });
+
+   console.log(scores);
    x.innerHTML = `
      <div class="team">
-       ${player(teamA[0])}
-       ${player(teamA[1])}
+       ${player(players[0])}
+       ${player(players[1])}
      </div>
-     <span>VS</span>
+      ${y.outerHTML}
      <div class="team">
-       ${player(teamB[0])}
-       ${player(teamB[1])}
+       ${player(players[2])}
+       ${player(players[3])}
      </div>`;
    x.classList.add('team-vs-team');
    return x
