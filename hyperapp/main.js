@@ -28,7 +28,7 @@ function playerList(users, f) {
 }
 
 function playerRow(user, f, i) {
-   return h("div", {class: "player", onclick: f(user.ID), key: i}, [
+   return h("div", {class: "player", onclick: [f, user.ID], key: i}, [
       h("span", {class: "index"}, text(i)),
       h("img", {class: "avatar", src: user.Avatar}),
       h("span", {class: "name"}, text([user.RealName, user.Name].filter(x => x !== "")[0])),
@@ -36,8 +36,9 @@ function playerRow(user, f, i) {
    ])
 }
 
-function addToQueue(id) {
-   return null
+function addToQueue(state, id) {
+   console.log(id)
+   return state
 }
 
 function addScore(user) {
@@ -46,4 +47,29 @@ function addScore(user) {
       Score: user.Skill.Mu - 3 * Math.sqrt(user.Skill.SigSq),
       Sigma: Math.sqrt(user.Skill.SigSq),
    }
+}
+
+function callApi(dispatch, options) {
+   fetch("/api" + options.route,
+      {
+         ...(options.method) && {method: options.method},
+         ...(options.body) && {body: JSON.stringify(options.body)},
+      })
+   .then(response => response.json())
+   .then(data => dispatch(options.action, data))
+}
+
+function GetGState(state) {[
+   state,
+   [
+      callApi,
+      {
+         action: UpdateGState,
+         route: "/state",
+      },
+   ],
+]}
+
+function UpdateGState(state, data) {
+   return {...state, queue: data.Queue, game: data.Game, set: data.Set}
 }

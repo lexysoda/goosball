@@ -7,7 +7,7 @@ html, body {
   margin: 0;
 }
 
-body {
+main {
   display: grid;
   grid-template-areas:
     "game"
@@ -18,7 +18,7 @@ body {
 
 @media (min-width: 1000px) {
   main {
-    display: grid;
+    Display: grid;
     grid-template-columns: 3fr 1fr;
     grid-template-rows: 1fr 5fr 5fr;
     grid-template-areas:
